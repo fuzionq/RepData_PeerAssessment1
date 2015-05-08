@@ -1,27 +1,34 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 The data are extracted and loaded into R using the read.table function.
 The classes are set appropriately, such as the Date class for the Date column.
 
-```{r}
+
+```r
 setwd("C:/Users/Matt/Documents/coursera/RepData_PeerAssessment1/")
 url <- "activity.zip"
 dat <- read.table(unz(url, "activity.csv"), sep = ",", header = TRUE, na.strings = NA, colClasses = c("integer", "Date", "integer"))
 head(dat)
 ```
 
+```
+##   steps       date interval
+## 1    NA 2012-10-01        0
+## 2    NA 2012-10-01        5
+## 3    NA 2012-10-01       10
+## 4    NA 2012-10-01       15
+## 5    NA 2012-10-01       20
+## 6    NA 2012-10-01       25
+```
+
 ## What is mean total number of steps taken per day?
 First, we will calculate the total number of steps taken per day.
 We can then create a histogram of this.
 
-```{r}
+
+```r
 total_steps <- tapply(dat$steps, dat$date, sum, na.rm = TRUE)
 library(ggplot2)
 total_steps_df <- as.data.frame(total_steps) # for ggplot2 usage
@@ -29,8 +36,24 @@ pl_hist <- ggplot(total_steps_df, aes(x = total_steps)) +
     geom_histogram(binwidth = 1000, fill = "red", colour = "black") + 
     theme_bw()
 pl_hist
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 mean(total_steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(total_steps)
+```
+
+```
+## [1] 10395
 ```
 
 We can also calculate the mean total number of steps taken per day, as shown above.
@@ -40,7 +63,8 @@ To investigate this, we need to look at how many steps are taken for each period
 The interval column is just the time, so we need to convert this, otherwise there will be a large gap in the daily activity plot between e.g. 1155 and 1200, as they would just be treated as standard numbers.
 I have used the chron package to be able to use just the time information, as we will look at the time values averaged over all the days.
 
-```{r}
+
+```r
 library(stringr)
 interval_pad <- str_pad(dat$interval, 4, "left", "0")
 dat$datetime <- paste(as.character(dat$date), as.character(interval_pad))
@@ -59,10 +83,17 @@ pl_daily <- ggplot(steps_per_interval, aes(x = Time, y = AverageSteps)) +
 pl_daily
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 We can calculate the time period on average which contained the maximum number of steps.
 
-```{r}
+
+```r
 steps_per_interval$Time[which.max(steps_per_interval$AverageSteps)]
+```
+
+```
+## [1] 08:35:00
 ```
 
 ## Imputing missing values
@@ -70,15 +101,23 @@ Note that there are a number of days/intervals where there are missing values (c
 
 How many NAs are there?
 
-```{r}
+
+```r
 missing_dat <- sapply(dat$steps, is.na)
 table(missing_dat)
 ```
 
-We see that there are `r table(sapply(dat$steps, is.na))[2]` missing entries.
+```
+## missing_dat
+## FALSE  TRUE 
+## 15264  2304
+```
+
+We see that there are 2304 missing entries.
 We shall try to compensate for this by replacing the missing entries with the mean for that five minute interval, as calculated earlier.
 
-```{r}
+
+```r
 # First, return the mean number for that time period
 mean_steps <- function(Time) {
     round(steps_per_interval[steps_per_interval$Time==Time,]$AverageSteps)
@@ -96,11 +135,25 @@ new_pl_hist <- ggplot(new_total_steps, aes(x = Steps)) +
 new_pl_hist
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 The mean and median total number of steps taken per day are reported below.
 
-```{r}
+
+```r
 mean(new_total_steps$Steps)
+```
+
+```
+## [1] 10765.64
+```
+
+```r
 median(new_total_steps$Steps)
+```
+
+```
+## [1] 10762
 ```
 
 The mean total number of steps have increased, whereas the median has stayed constant.
@@ -109,7 +162,8 @@ The total daily number of steps has also increased, this is clearly because we h
 ## Are there differences in activity patterns between weekdays and weekends?
 We create two plots below to show the differences between the number of steps taken over the course of an average weekday, in comparison to the weekend.
 
-```{r}
+
+```r
 new_dat$isWeekday <- !weekdays(new_dat$date) %in% c("Saturday", "Sunday")
 new_dat$isWeekday <- factor(new_dat$isWeekday, levels = c(TRUE, FALSE), labels = c("weekday","weekend"))
 new_steps_per_interval <- aggregate(steps ~ datetime + isWeekday, data = new_dat, mean, na.rm = TRUE)
@@ -121,7 +175,11 @@ pl_panel <- ggplot(new_steps_per_interval, aes(x = datetime, y = steps)) +
     facet_grid(isWeekday ~ .)
     
 pl_panel
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+```r
 pl_panel2 <- ggplot(new_steps_per_interval, aes(x = datetime, y = steps)) +
     geom_line(aes(colour = isWeekday)) + theme_bw() +
     scale_x_chron(format = "%H:%M", n = 11) +
@@ -130,4 +188,6 @@ pl_panel2 <- ggplot(new_steps_per_interval, aes(x = datetime, y = steps)) +
     
 pl_panel2
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-2.png) 
 
