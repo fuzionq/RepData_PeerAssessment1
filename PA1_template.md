@@ -7,7 +7,6 @@ The classes are set appropriately, such as the Date class for the Date column.
 
 
 ```r
-setwd("C:/Users/Matt/Documents/coursera/RepData_PeerAssessment1/")
 url <- "activity.zip"
 dat <- read.table(unz(url, "activity.csv"), sep = ",", header = TRUE, na.strings = NA, colClasses = c("integer", "Date", "integer"))
 head(dat)

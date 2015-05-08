@@ -67,8 +67,7 @@ img {
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
 <p>The data are extracted and loaded into R using the read.table function. The classes are set appropriately, such as the Date class for the Date column.</p>
-<pre class="r"><code>setwd(&quot;C:/Users/Matt/Documents/coursera/RepData_PeerAssessment1/&quot;)
-url &lt;- &quot;activity.zip&quot;
+<pre class="r"><code>url &lt;- &quot;activity.zip&quot;
 dat &lt;- read.table(unz(url, &quot;activity.csv&quot;), sep = &quot;,&quot;, header = TRUE, na.strings = NA, colClasses = c(&quot;integer&quot;, &quot;Date&quot;, &quot;integer&quot;))
 head(dat)</code></pre>
 <pre><code>##   steps       date interval
